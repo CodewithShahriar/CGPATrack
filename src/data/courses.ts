@@ -31,9 +31,5 @@ export const coursesData: CourseOption[] = [
   { name: "History of Emergence of Bangladesh", code: "GED202", creditHours: 3 },
   { name: " English I", code: "ENG114", creditHours: 3 },
   { name: "Physics I", code: "PHY111", creditHours: 3 },
-  { name: "Differential & Integral Calculus", code: "ECON101", creditHours: 3 },
-  { name: "Macroeconomics", code: "ECON102", creditHours: 3 },
-  { name: "Introduction to Marketing", code: "MKT101", creditHours: 3 },
-  { name: "Ethics in Technology", code: "PHIL230", creditHours: 3 },
-  { name: "Professional Development", code: "PROF100", creditHours: 1 }
+  { name: "Differential & Integral Calculus", code: "MAT112", creditHours: 3 }
 ];
