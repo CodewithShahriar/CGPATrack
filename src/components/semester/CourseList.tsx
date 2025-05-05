@@ -30,6 +30,9 @@ const CourseList: React.FC<CourseListProps> = ({ semesterId, courses }) => {
     return 'text-gray-500';
   };
 
+  // Define the GPA step values
+  const gpaSteps = [0.0, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25, 3.5, 3.75, 4.0];
+
   const handleGpaChange = (courseId: string, value: string) => {
     const gpa = parseFloat(value);
     if (!isNaN(gpa) && gpa >= 0 && gpa <= 4.0) {
@@ -37,6 +40,27 @@ const CourseList: React.FC<CourseListProps> = ({ semesterId, courses }) => {
       const grade = pointToGrade(gpa);
       updateCourse(semesterId, courseId, { grade });
     }
+  };
+
+  const handleGpaStep = (courseId: string, direction: 'up' | 'down') => {
+    const currentGpa = editingGpa[courseId] !== undefined 
+      ? editingGpa[courseId] 
+      : gradeToPoint(courses.find(c => c.id === courseId)?.grade || 'F');
+    
+    // Find the nearest step value
+    const nearestStepIndex = gpaSteps.findIndex(step => step > currentGpa) - 1;
+    let newGpaIndex;
+    
+    if (direction === 'up') {
+      newGpaIndex = nearestStepIndex + 1;
+      if (newGpaIndex >= gpaSteps.length) newGpaIndex = gpaSteps.length - 1;
+    } else {
+      newGpaIndex = nearestStepIndex;
+      if (newGpaIndex < 0) newGpaIndex = 0;
+    }
+    
+    const newGpa = gpaSteps[newGpaIndex];
+    handleGpaChange(courseId, newGpa.toString());
   };
 
   if (courses.length === 0) {
@@ -65,15 +89,35 @@ const CourseList: React.FC<CourseListProps> = ({ semesterId, courses }) => {
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium">GPA:</span>
-                <Input
-                  type="number"
-                  min="0"
-                  max="4.0"
-                  step="0.01"
-                  value={gpaValue}
-                  onChange={(e) => handleGpaChange(course.id, e.target.value)}
-                  className="w-20 h-8 text-center"
-                />
+                <div className="flex items-center">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-8 w-8 rounded-r-none"
+                    onClick={() => handleGpaStep(course.id, 'down')}
+                  >
+                    -
+                  </Button>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="4.0"
+                    step="0.01"
+                    value={gpaValue}
+                    onChange={(e) => handleGpaChange(course.id, e.target.value)}
+                    className="w-20 h-8 text-center rounded-none"
+                  />
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-8 w-8 rounded-l-none"
+                    onClick={() => handleGpaStep(course.id, 'up')}
+                  >
+                    +
+                  </Button>
+                </div>
               </div>
               
               <div className="flex items-center gap-2">

@@ -24,6 +24,9 @@ const AddCourseForm: React.FC<AddCourseFormProps> = ({ semesterId, onComplete })
   // Derived state for the grade based on GPA point
   const [grade, setGrade] = useState<Grade>('A+');
 
+  // Define the GPA step values
+  const gpaSteps = [0.0, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25, 3.5, 3.75, 4.0];
+
   // Update grade whenever GPA point changes
   useEffect(() => {
     setGrade(pointToGrade(gpaPoint));
@@ -55,6 +58,22 @@ const AddCourseForm: React.FC<AddCourseFormProps> = ({ semesterId, onComplete })
     if (!isNaN(value) && value >= 0 && value <= 4.0) {
       setGpaPoint(parseFloat(value.toFixed(2)));
     }
+  };
+
+  const handleGpaStep = (direction: 'up' | 'down') => {
+    // Find the nearest step value
+    const nearestStepIndex = gpaSteps.findIndex(step => step > gpaPoint) - 1;
+    let newGpaIndex;
+    
+    if (direction === 'up') {
+      newGpaIndex = nearestStepIndex + 1;
+      if (newGpaIndex >= gpaSteps.length) newGpaIndex = gpaSteps.length - 1;
+    } else {
+      newGpaIndex = nearestStepIndex;
+      if (newGpaIndex < 0) newGpaIndex = 0;
+    }
+    
+    setGpaPoint(gpaSteps[newGpaIndex]);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -136,7 +155,16 @@ const AddCourseForm: React.FC<AddCourseFormProps> = ({ semesterId, onComplete })
         
         <div className="space-y-2">
           <Label htmlFor="gpaPoint">GPA (0.0 - 4.0)</Label>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-0">
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="icon" 
+              className="h-10 rounded-r-none"
+              onClick={() => handleGpaStep('down')}
+            >
+              -
+            </Button>
             <Input
               id="gpaPoint"
               type="number"
@@ -145,8 +173,18 @@ const AddCourseForm: React.FC<AddCourseFormProps> = ({ semesterId, onComplete })
               step="0.01"
               value={gpaPoint}
               onChange={handleGpaChange}
+              className="rounded-none text-center"
             />
-            <div className="text-sm font-medium bg-secondary px-2 py-1 rounded">
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="icon" 
+              className="h-10 rounded-l-none"
+              onClick={() => handleGpaStep('up')}
+            >
+              +
+            </Button>
+            <div className="ml-2 text-sm font-medium bg-secondary px-2 py-1 rounded">
               {grade}
             </div>
           </div>
