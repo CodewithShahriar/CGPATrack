@@ -10,7 +10,7 @@ export const coursesData: CourseOption[] = [
   { name: "Algorithm Design and Analysis", code: "CSE231", creditHours: 3 },
   { name: "Algorithm Design and Analysis Lab", code: "CSE232", creditHours: 1.5 },
   { name: "Digital Logic Design", code: "CSE211", creditHours: 3 },
-  { name: "Web Development", code: "CS325", creditHours: 3 },
+  { name: " Digital Logic Design Lab", code: "CSE212", creditHours: 1.5 },
   { name: "Mobile App Development", code: "CS330", creditHours: 3 },
   { name: "Calculus I", code: "MATH101", creditHours: 4 },
   { name: "Linear Algebra", code: "MATH201", creditHours: 3 },
