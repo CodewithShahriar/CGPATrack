@@ -87,3 +87,22 @@ export const updateCGPAData = (semesters: Semester[]): CGPAData => {
     totalCredits: calculateTotalCredits(semesters)
   };
 };
+
+// Get the next GPA value based on specified steps
+export const getNextGpaStep = (currentGpa: number, direction: 'up' | 'down'): number => {
+  const gpaSteps = [0.0, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25, 3.5, 3.75, 4.0];
+  
+  // Find the nearest step value
+  const nearestStepIndex = gpaSteps.findIndex(step => step > currentGpa) - 1;
+  let newGpaIndex;
+  
+  if (direction === 'up') {
+    newGpaIndex = nearestStepIndex + 1;
+    if (newGpaIndex >= gpaSteps.length) newGpaIndex = gpaSteps.length - 1;
+  } else {
+    newGpaIndex = nearestStepIndex;
+    if (newGpaIndex < 0) newGpaIndex = 0;
+  }
+  
+  return gpaSteps[newGpaIndex];
+};
