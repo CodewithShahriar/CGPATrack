@@ -1,4 +1,3 @@
-
 import { Grade, Course, Semester, CGPAData } from '../types';
 
 // Grade to GPA point conversion
@@ -18,6 +17,21 @@ export const gradeToPoint = (grade: Grade): number => {
   };
   
   return gradeMap[grade];
+};
+
+// GPA point to Grade conversion
+export const pointToGrade = (point: number): Grade => {
+  if (point >= 4.0) return 'A+';
+  if (point >= 3.75) return 'A';
+  if (point >= 3.5) return 'A-';
+  if (point >= 3.25) return 'B+';
+  if (point >= 3.0) return 'B';
+  if (point >= 2.75) return 'B-';
+  if (point >= 2.5) return 'C+';
+  if (point >= 2.25) return 'C';
+  if (point >= 2.0) return 'C-';
+  if (point >= 1.0) return 'D';
+  return 'F';
 };
 
 // Calculate GPA for a semester
