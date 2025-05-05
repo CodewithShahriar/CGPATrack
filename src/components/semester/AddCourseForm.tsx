@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCGPA } from '@/contexts/CGPAContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { coursesData } from '@/data/courses';
 import { Grade } from '@/types';
+import { pointToGrade } from '@/utils/gpaCalculator';
 
 interface AddCourseFormProps {
   semesterId: string;
@@ -17,14 +17,20 @@ const AddCourseForm: React.FC<AddCourseFormProps> = ({ semesterId, onComplete })
   const [courseName, setCourseName] = useState('');
   const [courseCode, setCourseCode] = useState('');
   const [creditHours, setCreditHours] = useState(3);
-  const [grade, setGrade] = useState<Grade>('A');
+  const [gpaPoint, setGpaPoint] = useState(4.0);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { addCourse } = useCGPA();
 
+  // Derived state for the grade based on GPA point
+  const [grade, setGrade] = useState<Grade>('A+');
+
+  // Update grade whenever GPA point changes
+  useEffect(() => {
+    setGrade(pointToGrade(gpaPoint));
+  }, [gpaPoint]);
+
   // For dropdown selection
   const [selectedCourse, setSelectedCourse] = useState('');
-
-  const gradeOptions: Grade[] = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D', 'F'];
 
   const handleCourseSelect = (courseCode: string) => {
     setSelectedCourse(courseCode);
@@ -42,6 +48,13 @@ const AddCourseForm: React.FC<AddCourseFormProps> = ({ semesterId, onComplete })
     setCourseName(e.target.value);
     setSelectedCourse(''); // Clear selected course when custom name is entered
     setErrors({});
+  };
+
+  const handleGpaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value);
+    if (!isNaN(value) && value >= 0 && value <= 4.0) {
+      setGpaPoint(parseFloat(value.toFixed(2)));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -67,7 +80,7 @@ const AddCourseForm: React.FC<AddCourseFormProps> = ({ semesterId, onComplete })
     setCourseName('');
     setCourseCode('');
     setCreditHours(3);
-    setGrade('A');
+    setGpaPoint(4.0);
     setSelectedCourse('');
     
     if (onComplete) {
@@ -113,25 +126,30 @@ const AddCourseForm: React.FC<AddCourseFormProps> = ({ semesterId, onComplete })
           <Input
             id="creditHours"
             type="number"
-            min="1"
+            min="0.5"
             max="6"
+            step="0.5"
             value={creditHours}
             onChange={(e) => setCreditHours(Number(e.target.value))}
           />
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="grade">Grade</Label>
-          <Select value={grade} onValueChange={(value) => setGrade(value as Grade)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select grade" />
-            </SelectTrigger>
-            <SelectContent>
-              {gradeOptions.map((g) => (
-                <SelectItem key={g} value={g}>{g}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Label htmlFor="gpaPoint">GPA (0.0 - 4.0)</Label>
+          <div className="flex items-center space-x-2">
+            <Input
+              id="gpaPoint"
+              type="number"
+              min="0"
+              max="4.0"
+              step="0.01"
+              value={gpaPoint}
+              onChange={handleGpaChange}
+            />
+            <div className="text-sm font-medium bg-secondary px-2 py-1 rounded">
+              {grade}
+            </div>
+          </div>
         </div>
       </div>
       
