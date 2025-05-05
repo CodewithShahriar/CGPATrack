@@ -8,7 +8,7 @@ export interface CourseOption {
 export const coursesData: CourseOption[] = [
   { name: "Competitive Programming", code: "CS200", creditHours: 3 },
   { name: "Algorithm Design and Analysis", code: "CS231", creditHours: 3 },
-  { name: "Algorithms", code: "CS301", creditHours: 4 },
+  { name: " Algorithm Design and Analysis Lab", code: "CS232", creditHours: 1.5 },
   { name: "Database Systems", code: "CS305", creditHours: 3 },
   { name: "Web Development", code: "CS325", creditHours: 3 },
   { name: "Mobile App Development", code: "CS330", creditHours: 3 },
