@@ -14,7 +14,7 @@ export const coursesData: CourseOption[] = [
   { name: "Geometry & Vector Analysis", code: "MAT216", creditHours: 3 },
   { name: "Data Structure", code: "CSE133", creditHours: 4 },
   { name: "Data Structure Lab", code: "CSE134", creditHours: 1.5 },
-  { name: "Statistics", code: "MATH240", creditHours: 3 },
+  { name: "Matrices, Complex Variable & Fourier Analysis", code: "MAT135", creditHours: 3 },
   { name: "Discrete Mathematics", code: "MATH220", creditHours: 4 },
   { name: "Physics I", code: "PHYS101", creditHours: 4 },
   { name: "Physics II", code: "PHYS102", creditHours: 4 },
