@@ -1,11 +1,10 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { useCGPA } from '@/contexts/CGPAContext';
 import { Button } from '@/components/ui/button';
 import { Course, Grade } from '@/types';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { gradeToPoint } from '@/utils/gpaCalculator';
+import { Input } from '@/components/ui/input';
+import { gradeToPoint, pointToGrade } from '@/utils/gpaCalculator';
 
 interface CourseListProps {
   semesterId: string;
@@ -14,6 +13,7 @@ interface CourseListProps {
 
 const CourseList: React.FC<CourseListProps> = ({ semesterId, courses }) => {
   const { updateCourse, removeCourse } = useCGPA();
+  const [editingGpa, setEditingGpa] = useState<Record<string, number>>({});
 
   // Get color based on GPA value
   const getGpaColor = (gpa: number) => {
@@ -30,8 +30,13 @@ const CourseList: React.FC<CourseListProps> = ({ semesterId, courses }) => {
     return 'text-gray-500';
   };
 
-  const handleGradeChange = (courseId: string, grade: Grade) => {
-    updateCourse(semesterId, courseId, { grade });
+  const handleGpaChange = (courseId: string, value: string) => {
+    const gpa = parseFloat(value);
+    if (!isNaN(gpa) && gpa >= 0 && gpa <= 4.0) {
+      setEditingGpa({...editingGpa, [courseId]: gpa});
+      const grade = pointToGrade(gpa);
+      updateCourse(semesterId, courseId, { grade });
+    }
   };
 
   if (courses.length === 0) {
@@ -45,69 +50,70 @@ const CourseList: React.FC<CourseListProps> = ({ semesterId, courses }) => {
 
   return (
     <div className="space-y-4">
-      {courses.map((course) => (
-        <div key={course.id} className="course-item">
-          <div className="flex-1">
-            <h3 className="font-medium">{course.name}</h3>
-            <p className="text-sm text-muted-foreground">{course.creditHours} credit hours</p>
-          </div>
+      {courses.map((course) => {
+        const gpaValue = editingGpa[course.id] !== undefined 
+          ? editingGpa[course.id] 
+          : gradeToPoint(course.grade);
           
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Grade:</span>
-              <Select
-                value={course.grade}
-                onValueChange={(value) => handleGradeChange(course.id, value as Grade)}
-              >
-                <SelectTrigger className="w-20">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="A+">A+</SelectItem>
-                  <SelectItem value="A">A</SelectItem>
-                  <SelectItem value="A-">A-</SelectItem>
-                  <SelectItem value="B+">B+</SelectItem>
-                  <SelectItem value="B">B</SelectItem>
-                  <SelectItem value="B-">B-</SelectItem>
-                  <SelectItem value="C+">C+</SelectItem>
-                  <SelectItem value="C">C</SelectItem>
-                  <SelectItem value="C-">C-</SelectItem>
-                  <SelectItem value="D">D</SelectItem>
-                  <SelectItem value="F">F</SelectItem>
-                </SelectContent>
-              </Select>
+        return (
+          <div key={course.id} className="course-item">
+            <div className="flex-1">
+              <h3 className="font-medium">{course.name}</h3>
+              <p className="text-sm text-muted-foreground">{course.creditHours} credit hours</p>
             </div>
             
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Points:</span>
-              <span className={`text-sm font-medium ${getGpaColor(gradeToPoint(course.grade))}`}>
-                {gradeToPoint(course.grade).toFixed(2)}
-              </span>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">GPA:</span>
+                <Input
+                  type="number"
+                  min="0"
+                  max="4.0"
+                  step="0.01"
+                  value={gpaValue}
+                  onChange={(e) => handleGpaChange(course.id, e.target.value)}
+                  className="w-20 h-8 text-center"
+                />
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">Grade:</span>
+                <span className={`text-sm font-medium ${getGpaColor(gpaValue)}`}>
+                  {course.grade}
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">Points:</span>
+                <span className={`text-sm font-medium ${getGpaColor(gpaValue)}`}>
+                  {gpaValue.toFixed(2)}
+                </span>
+              </div>
+              
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">Remove</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Remove this course?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will remove "{course.name}" from this semester.
+                      This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => removeCourse(semesterId, course.id)}>
+                      Remove
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
-            
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">Remove</Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Remove this course?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will remove "{course.name}" from this semester.
-                    This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => removeCourse(semesterId, course.id)}>
-                    Remove
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
