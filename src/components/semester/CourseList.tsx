@@ -103,7 +103,7 @@ const CourseList: React.FC<CourseListProps> = ({ semesterId, courses }) => {
                     type="number"
                     min="0"
                     max="4.0"
-                    step="0.01"
+                    step="0.25"
                     value={gpaValue}
                     onChange={(e) => handleGpaChange(course.id, e.target.value)}
                     className="w-20 h-8 text-center rounded-none"
