@@ -17,7 +17,7 @@ export const coursesData: CourseOption[] = [
   { name: "Matrices, Complex Variable & Fourier Analysis", code: "MAT135", creditHours: 3 },
   { name: "Basic Electronics Engineering", code: "CSE131", creditHours: 3 },
   { name: "Basic Electronics Engineering Lab", code: "CSE132", creditHours: 1.5 },
-  { name: "Physics II", code: "PHYS102", creditHours: 4 },
+  { name: "Principles of Economics & Entrepreneurship Development", code: "GED213", creditHours: 3 },
   { name: "English Composition", code: "ENG101", creditHours: 3 },
   { name: "Technical Writing", code: "ENG205", creditHours: 3 },
   { name: "Artificial Intelligence", code: "CS410", creditHours: 4 },
