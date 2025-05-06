@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useCGPA } from '@/contexts/CGPAContext';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import { Grade, Course } from '@/types';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import AddSemesterForm from '@/components/semester/AddSemesterForm';
+import { gradeToPoint, pointToGrade } from '@/utils/gpaCalculator';
 
 const CGPACalculator: React.FC = () => {
   const { data, addCourse } = useCGPA();
@@ -17,8 +17,12 @@ const CGPACalculator: React.FC = () => {
   const [selectedSemester, setSelectedSemester] = useState('');
   const [courseName, setCourseName] = useState('');
   const [creditHours, setCreditHours] = useState(3);
-  const [grade, setGrade] = useState<Grade>('A');
+  const [gpaPoint, setGpaPoint] = useState(4.0);
+  const [grade, setGrade] = useState<Grade>('A+');
   const [showAddSemester, setShowAddSemester] = useState(false);
+
+  // Define the GPA step values
+  const gpaSteps = [0.0, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25, 3.5, 3.75, 4.0];
 
   // Auto-select first semester if available and none selected
   useEffect(() => {
@@ -36,7 +40,10 @@ const CGPACalculator: React.FC = () => {
     }
   }, [semesters.length]);
 
-  const gradeOptions: Grade[] = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D', 'F'];
+  // Update grade whenever GPA point changes
+  useEffect(() => {
+    setGrade(pointToGrade(gpaPoint));
+  }, [gpaPoint]);
 
   // Get color based on GPA value
   const getGpaColor = (gpa: number) => {
@@ -46,6 +53,29 @@ const CGPACalculator: React.FC = () => {
     if (gpa >= 2.0) return 'text-yellow-500';
     if (gpa >= 1.0) return 'text-red-500';
     return 'text-gray-500';
+  };
+
+  const handleGpaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value);
+    if (!isNaN(value) && value >= 0 && value <= 4.0) {
+      setGpaPoint(parseFloat(value.toFixed(2)));
+    }
+  };
+
+  const handleGpaStep = (direction: 'up' | 'down') => {
+    // Find the nearest step value
+    const nearestStepIndex = gpaSteps.findIndex(step => step > gpaPoint) - 1;
+    let newGpaIndex;
+    
+    if (direction === 'up') {
+      newGpaIndex = nearestStepIndex + 1;
+      if (newGpaIndex >= gpaSteps.length) newGpaIndex = gpaSteps.length - 1;
+    } else {
+      newGpaIndex = nearestStepIndex;
+      if (newGpaIndex < 0) newGpaIndex = 0;
+    }
+    
+    setGpaPoint(gpaSteps[newGpaIndex]);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -72,7 +102,7 @@ const CGPACalculator: React.FC = () => {
     // Reset form
     setCourseName('');
     setCreditHours(3);
-    setGrade('A');
+    setGpaPoint(4.0);
   };
 
   return (
@@ -157,25 +187,51 @@ const CGPACalculator: React.FC = () => {
                       <Input
                         id="creditHours"
                         type="number"
-                        min="1"
+                        min="0.5"
                         max="6"
+                        step="0.5"
                         value={creditHours}
                         onChange={(e) => setCreditHours(Number(e.target.value))}
                       />
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="grade">Grade</Label>
-                      <Select value={grade} onValueChange={(value) => setGrade(value as Grade)}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {gradeOptions.map((g) => (
-                            <SelectItem key={g} value={g}>{g}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label htmlFor="gpaPoint">GPA (0.0 - 4.0)</Label>
+                      <div className="flex items-center space-x-2">
+                        <div className="flex items-center flex-1">
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="icon" 
+                            className="h-10 rounded-r-none"
+                            onClick={() => handleGpaStep('down')}
+                          >
+                            -
+                          </Button>
+                          <Input
+                            id="gpaPoint"
+                            type="number"
+                            min="0"
+                            max="4.0"
+                            step="0.01"
+                            value={gpaPoint}
+                            onChange={handleGpaChange}
+                            className="rounded-none text-center"
+                          />
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="icon" 
+                            className="h-10 rounded-l-none"
+                            onClick={() => handleGpaStep('up')}
+                          >
+                            +
+                          </Button>
+                        </div>
+                        <div className="ml-2 text-sm font-medium bg-secondary px-2 py-1 rounded">
+                          {grade}
+                        </div>
+                      </div>
                     </div>
                   </div>
                   
