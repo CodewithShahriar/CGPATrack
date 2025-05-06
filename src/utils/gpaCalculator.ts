@@ -34,7 +34,7 @@ export const pointToGrade = (point: number): Grade => {
   return 'F';
 };
 
-// Calculate GPA for a semester
+// Calculate GPA for a semester (excluding F grades from credit hour calculation)
 export const calculateSemesterGPA = (courses: Course[]): number => {
   if (courses.length === 0) return 0;
   
@@ -44,18 +44,26 @@ export const calculateSemesterGPA = (courses: Course[]): number => {
   courses.forEach(course => {
     const point = gradeToPoint(course.grade);
     totalPoints += point * course.creditHours;
-    totalCredits += course.creditHours;
+    
+    // Only count credit hours if the course doesn't have a 0 GPA (F grade)
+    if (point > 0) {
+      totalCredits += course.creditHours;
+    }
   });
   
   return totalCredits === 0 ? 0 : parseFloat((totalPoints / totalCredits).toFixed(2));
 };
 
-// Calculate total credits for a semester
+// Calculate total credits for a semester (excluding F grades)
 export const calculateSemesterCredits = (courses: Course[]): number => {
-  return courses.reduce((sum, course) => sum + course.creditHours, 0);
+  return courses.reduce((sum, course) => {
+    const point = gradeToPoint(course.grade);
+    // Only add to total credits if the course doesn't have a 0 GPA (F grade)
+    return sum + (point > 0 ? course.creditHours : 0);
+  }, 0);
 };
 
-// Calculate CGPA across all semesters
+// Calculate CGPA across all semesters (excluding F grades from credit hour calculation)
 export const calculateCGPA = (semesters: Semester[]): number => {
   if (semesters.length === 0) return 0;
   
@@ -66,17 +74,25 @@ export const calculateCGPA = (semesters: Semester[]): number => {
     semester.courses.forEach(course => {
       const point = gradeToPoint(course.grade);
       totalPoints += point * course.creditHours;
-      totalCredits += course.creditHours;
+      
+      // Only count credit hours if the course doesn't have a 0 GPA (F grade)
+      if (point > 0) {
+        totalCredits += course.creditHours;
+      }
     });
   });
   
   return totalCredits === 0 ? 0 : parseFloat((totalPoints / totalCredits).toFixed(2));
 };
 
-// Calculate total credits across all semesters
+// Calculate total credits across all semesters (excluding F grades)
 export const calculateTotalCredits = (semesters: Semester[]): number => {
   return semesters.reduce((sum, semester) => 
-    sum + semester.courses.reduce((semSum, course) => semSum + course.creditHours, 0), 0);
+    sum + semester.courses.reduce((semSum, course) => {
+      const point = gradeToPoint(course.grade);
+      // Only add to total credits if the course doesn't have a 0 GPA (F grade)
+      return semSum + (point > 0 ? course.creditHours : 0);
+    }, 0), 0);
 };
 
 // Update CGPA data
